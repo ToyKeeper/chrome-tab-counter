@@ -54,22 +54,6 @@ function updateTabOpenCount() {
     //  .then(() => console.log('It worked.'))
     //  .catch(err => console.log('It failed:', err));
     //console.log('updateTabOpenCount() done');
-    /*
-    var dbPromise = idb.open('tabcount', 1, function(upgradeDb) {
-        if (!upgradeDb.objectStoreNames.contains('tabsOpen')) {
-            var tabsOpenOS = upgradeDb.createObjectStore('tabsOpen');
-        }
-    });
-    dbPromise.then(function(db) {
-        var tx = db.transaction('tabsOpen', 'readwrite');
-        var store = tx.objectStore('tabsOpen');
-        var item = localStorage.getObject('tabsOpen').toString();
-        store.put(item);
-        return tx.complete;
-    }).then(function() {
-        console.log('tab count updated!');
-    });
-    */
 }
 
 function resetTabOpenCount() {
