@@ -12,23 +12,23 @@ function shareListeners() {
 
 function init() {
 
-        if (!('indexedDB' in window)) {
-            console.log('This browser doesn\'t support IndexedDB');
-            return;
-        }
-        //else { console.log('IndexedDB supported, I think.'); }
+    if (!('indexedDB' in window)) {
+        console.log('This browser doesn\'t support IndexedDB');
+        return;
+    }
+    //else { console.log('IndexedDB supported, I think.'); }
 
-	localStorage.setObject("tabsOpen", 0);
+    localStorage.setObject("tabsOpen", 0);
 
-	chrome.tabs.onCreated.addListener(function(tab) {
-		incrementTabOpenCount(1);
-	});
+    chrome.tabs.onCreated.addListener(function(tab) {
+        incrementTabOpenCount(1);
+    });
 
-	chrome.tabs.onRemoved.addListener(function(tab) {
-		decrementTabOpenCount();
-	});
+    chrome.tabs.onRemoved.addListener(function(tab) {
+        decrementTabOpenCount();
+    });
 
-	updateTabTotalCount();
+    updateTabTotalCount();
 }
 
 function incrementTabOpenCount(count) {
@@ -36,38 +36,38 @@ function incrementTabOpenCount(count) {
     if (!count)
         count = 1;
 
-	localStorage.setObject('tabsOpen', localStorage.getObject('tabsOpen') + count);
-	updateTabOpenCount();
+    localStorage.setObject('tabsOpen', localStorage.getObject('tabsOpen') + count);
+    updateTabOpenCount();
 }
 
 function decrementTabOpenCount() {
-	localStorage.setObject('tabsOpen', localStorage.getObject('tabsOpen') - 1);
-	updateTabOpenCount();
+    localStorage.setObject('tabsOpen', localStorage.getObject('tabsOpen') - 1);
+    updateTabOpenCount();
 }
 
 function updateTabOpenCount() {
-        //console.log('updateTabOpenCount()');
-	chrome.browserAction.setBadgeText({text: localStorage.getObject('tabsOpen').toString()});
-	chrome.browserAction.setBadgeBackgroundColor({ "color": [89, 65, 0, 255] });
-        var tabsOpen = localStorage.getObject('tabsOpen').toString();
-        idbKeyval.set('tabsOpen', tabsOpen);
-        //  .then(() => console.log('It worked.'))
-        //  .catch(err => console.log('It failed:', err));
-        //console.log('updateTabOpenCount() done');
-  /*
-        var dbPromise = idb.open('tabcount', 1, function(upgradeDb) {
-          if (!upgradeDb.objectStoreNames.contains('tabsOpen')) {
+    //console.log('updateTabOpenCount()');
+    chrome.browserAction.setBadgeText({text: localStorage.getObject('tabsOpen').toString()});
+    chrome.browserAction.setBadgeBackgroundColor({ "color": [89, 65, 0, 255] });
+    var tabsOpen = localStorage.getObject('tabsOpen').toString();
+    idbKeyval.set('tabsOpen', tabsOpen);
+    //  .then(() => console.log('It worked.'))
+    //  .catch(err => console.log('It failed:', err));
+    //console.log('updateTabOpenCount() done');
+    /*
+    var dbPromise = idb.open('tabcount', 1, function(upgradeDb) {
+        if (!upgradeDb.objectStoreNames.contains('tabsOpen')) {
             var tabsOpenOS = upgradeDb.createObjectStore('tabsOpen');
-          }
-        });
-        dbPromise.then(function(db) {
-          var tx = db.transaction('tabsOpen', 'readwrite');
-          var store = tx.objectStore('tabsOpen');
-          var item = localStorage.getObject('tabsOpen').toString();
-          store.put(item);
-          return tx.complete;
-        }).then(function() {
-          console.log('tab count updated!');
+        }
+    });
+    dbPromise.then(function(db) {
+        var tx = db.transaction('tabsOpen', 'readwrite');
+        var store = tx.objectStore('tabsOpen');
+        var item = localStorage.getObject('tabsOpen').toString();
+        store.put(item);
+        return tx.complete;
+    }).then(function() {
+        console.log('tab count updated!');
     });
     */
 }
@@ -88,5 +88,5 @@ function updateTabTotalCount() {
 function initPopup() {
     $$('.totalOpen').invoke('update', localStorage.tabsOpen);
 
-	shareListeners();
+    shareListeners();
 }
