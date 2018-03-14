@@ -8,34 +8,17 @@ Storage.prototype.getObject = function(key) {
 
 function shareListeners() {
 
-	var storeURL = 'https://chrome.google.com/webstore/detail/fhnegjjodccfaliddboelcleikbmapik';
-
-	$('social-fb').observe('click', function(event) {
-		event.stop();
-
-		chrome.windows.create({
-			'url': 'http://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(storeURL) + '&t=' + encodeURIComponent('I have ' + localStorage.tabsOpen + ' open & ' + localStorage.tabsTotal + ' all-time-opened browser tabs.'),
-			'type': 'popup'
-		});
-	});
-
-	$('social-twitter').observe('click', function(event) {
-		event.stop();
-
-		chrome.windows.create({
-			'url': 'http://twitter.com/home?status=' + encodeURIComponent('Current browser tabs count: ' + localStorage.tabsOpen + ' open & ' + localStorage.tabsTotal + ' all-time opened tabs. //via bit.ly/ptSWJu #chrome'),
-			'type': 'popup'
-		});
-	});
 }
 
 function init() {
 
-	localStorage.setObject("tabsOpen", 0);
+        if (!('indexedDB' in window)) {
+            console.log('This browser doesn\'t support IndexedDB');
+            return;
+        }
+        //else { console.log('IndexedDB supported, I think.'); }
 
-	var tabsTotal = localStorage.getObject('tabsTotal')
-	if (!tabsTotal)
-		localStorage.setObject("tabsTotal", 0);
+	localStorage.setObject("tabsOpen", 0);
 
 	chrome.tabs.onCreated.addListener(function(tab) {
 		incrementTabOpenCount(1);
@@ -54,7 +37,6 @@ function incrementTabOpenCount(count) {
         count = 1;
 
 	localStorage.setObject('tabsOpen', localStorage.getObject('tabsOpen') + count);
-    localStorage.setObject('tabsTotal', localStorage.getObject('tabsTotal') + count);
 	updateTabOpenCount();
 }
 
@@ -64,17 +46,35 @@ function decrementTabOpenCount() {
 }
 
 function updateTabOpenCount() {
+        //console.log('updateTabOpenCount()');
 	chrome.browserAction.setBadgeText({text: localStorage.getObject('tabsOpen').toString()});
 	chrome.browserAction.setBadgeBackgroundColor({ "color": [89, 65, 0, 255] });
+        var tabsOpen = localStorage.getObject('tabsOpen').toString();
+        idbKeyval.set('tabsOpen', tabsOpen);
+        //  .then(() => console.log('It worked.'))
+        //  .catch(err => console.log('It failed:', err));
+        //console.log('updateTabOpenCount() done');
+  /*
+        var dbPromise = idb.open('tabcount', 1, function(upgradeDb) {
+          if (!upgradeDb.objectStoreNames.contains('tabsOpen')) {
+            var tabsOpenOS = upgradeDb.createObjectStore('tabsOpen');
+          }
+        });
+        dbPromise.then(function(db) {
+          var tx = db.transaction('tabsOpen', 'readwrite');
+          var store = tx.objectStore('tabsOpen');
+          var item = localStorage.getObject('tabsOpen').toString();
+          store.put(item);
+          return tx.complete;
+        }).then(function() {
+          console.log('tab count updated!');
+    });
+    */
 }
 
 function resetTabOpenCount() {
     localStorage.setObject('tabsOpen', 0);
     updateTabOpenCount();
-}
-
-function resetTabTotalCount() {
-    localStorage.setObject('tabsTotal', 0);
 }
 
 function updateTabTotalCount() {
@@ -86,7 +86,6 @@ function updateTabTotalCount() {
 }
 
 function initPopup() {
-    $$('.totalCounter').invoke('update', localStorage.tabsTotal);
     $$('.totalOpen').invoke('update', localStorage.tabsOpen);
 
 	shareListeners();
